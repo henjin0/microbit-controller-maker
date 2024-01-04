@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Draggable and Resizable Tiles with Gridster.js</title>
+  <!-- Gridster.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.gridster/0.5.6/jquery.gridster.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.9.0/nipplejs.min.js"
+    integrity="sha512-7PRZndBOTMkYqbGwO6dvNDozKEwaJYu3zPLoLv0rzOLMPQ2PVh6yaevCZOUL8+/n+A16fnLYEBKAlYXgMBn54w=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.gridster/0.5.6/jquery.gridster.min.css" />
+  <style>
+    /* Container style with responsive grid */
+    #tile-container {
+      margin: 10px;
+    }
+
+    /* Style for the resizable tiles */
+    .gs-w {
+      position: relative;
+      background-color: #3498db;
+      color: white;
+      text-align: center;
+      cursor: move;
+    }
+
+    .gs-resize-handle {
+      background-color: #fff;
+      cursor: nwse-resize;
+      /* Resize cursor */
+    }
+
+    /* Style for the delete button */
+    .delete-button {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      cursor: pointer;
+      color: white;
+      background-color: red;
+      border: none;
+      padding: 5px;
+      font-size: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <button id="add-tile-btn">Add Resizable Tile</button>
+  <button id="disable-dragging-btn">Disable Dragging</button>
+  <button id="enable-dragging-btn">Enable Dragging</button>
+
+
+  <div id="tile-container">
+    <!-- Initial tiles go here -->
+  </div>
+
+  <script>
+    let idCounter = 0;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Initialize Gridster
+      let gridster = $("#tile-container").gridster({
+        widget_margins: [5, 5],
+        widget_base_dimensions: [100, 100],
+        autogenerate_stylesheet: true,
+        avoid_overlapped_widgets: true,
+        resize: {
+          enabled: true,
+        },
+      }).data('gridster');
+
+      // Event listener for adding a new tile
+      document.getElementById('add-tile-btn').addEventListener('click', function () {
+        addTile();
+      });
+
+      // Event listener for adding a new tile
+      document.getElementById('disable-dragging-btn').addEventListener('click', function () {
+        disableDraggingTile();
+      });
+
+      // Event listener for adding a new tile
+      document.getElementById('enable-dragging-btn').addEventListener('click', function () {
+        enableDraggingTile();
+      });
+
+
+      // Function to generate a random color
+      function getRandomColor() {
+        let letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      }
+
+      // Add a new resizable tile
+      function addTile() {
+        let tileContent = `
+        <div class="gs-w" id="item-${idCounter}">
+          <div>
+            <button class="delete-button" onclick="deleteTile(this)">Delete</button>
+          </div>
+          <div>
+            <input type="text" id="item-title-${idCounter}" required minlength="4" maxlength="8" size="10" value="ui-${idCounter}" />
+          </div>
+          <div id="item-ui-${idCounter}">
+            <p>aaaaaa</p>
+            <p>aaaaaa</p>
+            <p>aaaaaa</p>
+          </div>
+        </div>
+        
+      `;
+
+        let newTile = gridster.add_widget(tileContent, 1, 1);
+
+        // Assign a random background color
+        let randomColor = getRandomColor();
+        newTile[0].style.backgroundColor = randomColor;
+
+        nipplejs.create({
+          zone: document.getElementById(`item-ui-${idCounter}`),
+          color: "blue",
+        }).on("move", function (evt, data) {
+          const titleElement = document.getElementById(`item-title-${evt.target.id}`);
+            console.log(titleElement.value)
+            console.log(titleElement.value," move:", evt.target.nipples[0].frontPosition.x,':',evt.target.nipples[0].frontPosition.y);
+          })
+
+        idCounter++;
+        console.log(newTile)
+      }
+
+      function disableDraggingTile() {
+        gridster.disable();
+      }
+
+      function enableDraggingTile() {
+        gridster.enable();
+      }
+
+      // Delete the tile when the delete button is clicked
+      window.deleteTile = function (button) {
+        console.log(button)
+        let widget = $(button).closest('.gs-w')[0];
+        console.log(widget)
+        gridster.remove_widget(widget);
+      };
+
+    });
+  </script>
+
+
+</body>
+
+</html>
