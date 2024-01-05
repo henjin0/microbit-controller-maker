@@ -12,6 +12,10 @@
     integrity="sha512-7PRZndBOTMkYqbGwO6dvNDozKEwaJYu3zPLoLv0rzOLMPQ2PVh6yaevCZOUL8+/n+A16fnLYEBKAlYXgMBn54w=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.gridster/0.5.6/jquery.gridster.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
   <style>
     /* Container style with responsive grid */
     #tile-container {
@@ -33,17 +37,19 @@
       /* Resize cursor */
     }
 
-    /* Style for the delete button */
-    .delete-button {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      cursor: pointer;
-      color: white;
-      background-color: red;
-      border: none;
-      padding: 5px;
-      font-size: 10px;
+    .image-border {
+            position: absolute;
+            top: 3lh;
+            right: 0;
+            bottom: 0.25lh;
+            left: 0;
+            overflow: hidden;
+    }
+
+    .image-border img {
+            width: 100%;
+            height: 100%;
+
     }
   </style>
 </head>
@@ -66,7 +72,7 @@
       // Initialize Gridster
       let gridster = $("#tile-container").gridster({
         widget_margins: [5, 5],
-        widget_base_dimensions: [100, 100],
+        widget_base_dimensions: [150, 250],
         autogenerate_stylesheet: true,
         avoid_overlapped_widgets: true,
         resize: {
@@ -105,16 +111,31 @@
         let tileContent = `
         <div class="gs-w" id="item-${idCounter}">
           <div>
-            <button class="delete-button" onclick="deleteTile(this)">Delete</button>
+            ≡≡≡≡
           </div>
-          <div>
-            <input type="text" id="item-title-${idCounter}" required minlength="4" maxlength="8" size="10" value="ui-${idCounter}" />
+          <div class="container-fluid">
+            <div class="row pt-1">
+              <div class="col-7">
+                <input class="text-center w-100 form-control input-block" type="text" id="item-title-${idCounter}" required value="ui-${idCounter}" />
+              </div>
+              <div class="col-5">
+                <button class="text-center w-100 btn btn-primary btn-block" onclick="deleteTile(this)">x</button>
+              </div>
+            </div>
           </div>
-          <div id="item-ui-${idCounter}">
-            <p>aaaaaa</p>
-            <p>aaaaaa</p>
-            <p>aaaaaa</p>
+
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col">
+
+              <div class="image-border" id="item-ui-${idCounter}">
+                <img class="img-fluid" src="joystick.png"/>
+              </div>
+
+              </div>
+            </div>
           </div>
+
         </div>
         
       `;
@@ -130,12 +151,10 @@
           color: "blue",
         }).on("move", function (evt, data) {
           const titleElement = document.getElementById(`item-title-${evt.target.id}`);
-            console.log(titleElement.value)
-            console.log(titleElement.value," move:", evt.target.nipples[0].frontPosition.x,':',evt.target.nipples[0].frontPosition.y);
-          })
+          console.log(titleElement.value, " move:", evt.target.nipples[0].frontPosition.x, ':', evt.target.nipples[0].frontPosition.y);
+        })
 
         idCounter++;
-        console.log(newTile)
       }
 
       function disableDraggingTile() {
