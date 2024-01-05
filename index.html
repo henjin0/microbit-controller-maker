@@ -86,7 +86,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       // Initialize Gridster
       let gridster = $("#tile-container").gridster({
-        widget_margins: [5, 5],
+        widget_margins: [3, 3],
         widget_base_dimensions: [80, 150],
         autogenerate_stylesheet: true,
         avoid_overlapped_widgets: true,
@@ -139,7 +139,7 @@
                   <input class="w-100 text-center form-control-sm form-control input-block" type="text" id="item-title-${idCounter}" required value="ui-${idCounter}" />
                 </div>
                 <div class="col-4 nopadding">
-                  <button class="text-center w-100 btn btn-primary btn-block btn-sm" onclick="deleteTile(this)">x</button>
+                  <button class="text-center w-100 btn btn-danger btn-block btn-sm" onclick="deleteTile(this)">x</button>
                 </div>
             </div>
           </div>
@@ -190,7 +190,7 @@
                   <input class="w-100 text-center form-control-sm form-control input-block" type="text" id="item-title-${idCounter}" required value="ui-${idCounter}" />
                 </div>
                 <div class="col-4 nopadding">
-                  <button class="text-center w-100 btn btn-primary btn-block btn-sm" onclick="deleteTile(this)">x</button>
+                  <button class="text-center w-100 btn btn-danger btn-block btn-sm" onclick="deleteTile(this)">x</button>
                 </div>
             </div>
           </div>
@@ -198,7 +198,7 @@
           <div class="container-fluid">
             <div class="row">
               <div class="col nopadding button-border">
-                <button data-id="${idCounter}" id="item-ui-${idCounter}" class="text-center w-100 h-100 btn btn-primary btn-block">ボタン</button>
+                <button data-id="${idCounter}" id="item-ui-${idCounter}" class="text-center btn btn-success rounded-circle btn-block w-100 h-100">＋</button>
               </div>
             </div>
           </div>
@@ -215,8 +215,9 @@
 
         // Event listener for adding a new tile
         document.getElementById(`item-ui-${idCounter}`).addEventListener('click', function (e) {
-          const data = e.currentTarget.dataset['id'];
-          console.log("click:",data)
+          const id = e.currentTarget.dataset['id'];
+          const titleElement = document.getElementById(`item-title-${id}`);
+          console.log("click:",titleElement.value)
         });
       
         idCounter++;
