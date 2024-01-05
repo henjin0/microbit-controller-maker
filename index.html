@@ -46,6 +46,15 @@
             overflow: hidden;
     }
 
+    .button-border {
+            position: absolute;
+            top: 2.5lh;
+            right: 0;
+            bottom: 0.25lh;
+            left: 0;
+            overflow: hidden;
+    }
+
     .image-border img {
             width: 100%;
             height: 100%;
@@ -61,7 +70,8 @@
 <body>
 
   <div class="p-2">
-        <button class="btn btn-dark" id="add-tile-btn">+ joystick</button>
+        <button class="btn btn-dark" id="add-joystick-btn">+ joystick</button>
+        <button class="btn btn-dark" id="add-button-btn">+ button</button>
         <button class="btn btn-dark" id="disable-dragging-btn">Run</button>
         <button class="btn btn-dark " id="enable-dragging-btn">Stop</button>
   </div>
@@ -86,8 +96,13 @@
       }).data('gridster');
 
       // Event listener for adding a new tile
-      document.getElementById('add-tile-btn').addEventListener('click', function () {
+      document.getElementById('add-joystick-btn').addEventListener('click', function () {
         addJoystick();
+      });
+
+      // Event listener for adding a new tile
+      document.getElementById('add-button-btn').addEventListener('click', function () {
+        addButton();
       });
 
       // Event listener for adding a new tile
@@ -161,6 +176,52 @@
 
         idCounter++;
       }
+
+      // Add a new resizable tile
+      function addButton() {
+        let tileContent = `
+        <div class="gs-w" id="item-${idCounter}">
+          <div>
+            ≡≡≡≡
+          </div>
+          <div class="container-fluid">
+            <div class="row">
+                <div class="col-8 nopadding">
+                  <input class="w-100 text-center form-control-sm form-control input-block" type="text" id="item-title-${idCounter}" required value="ui-${idCounter}" />
+                </div>
+                <div class="col-4 nopadding">
+                  <button class="text-center w-100 btn btn-primary btn-block btn-sm" onclick="deleteTile(this)">x</button>
+                </div>
+            </div>
+          </div>
+
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col nopadding button-border">
+                <button data-id="${idCounter}" id="item-ui-${idCounter}" class="text-center w-100 h-100 btn btn-primary btn-block">ボタン</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        
+      `;
+
+        let newTile = gridster.add_widget(tileContent, 1, 1);
+
+        // Assign a random background color
+        let randomColor = getRandomColor();
+        newTile[0].style.backgroundColor = randomColor;
+
+        // Event listener for adding a new tile
+        document.getElementById(`item-ui-${idCounter}`).addEventListener('click', function (e) {
+          const data = e.currentTarget.dataset['id'];
+          console.log("click:",data)
+        });
+      
+        idCounter++;
+      }
+
 
       function disableDraggingTile() {
         gridster.disable();
