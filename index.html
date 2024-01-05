@@ -154,6 +154,7 @@
         return color;
       }
 
+      let endTime = performance.now();
       // Add a new resizable tile
       function addJoystick() {
         let tileContent = `
@@ -198,15 +199,27 @@
           zone: document.getElementById(`item-ui-${idCounter}`),
           color: "blue",
         }).on("move", function (evt, data) {
-          const titleElement = document.getElementById(`item-title-${evt.target.id}`);
-          console.log(titleElement.value, " move:", evt.target.nipples[0].frontPosition.x, ':', evt.target.nipples[0].frontPosition.y);
+          const startTime = performance.now();
+         
+          if(startTime - endTime < 100){
+            console.log(startTime - endTime)
+            return;
+          }
 
+          const titleElement = document.getElementById(`item-title-${evt.target.id}`);
+          const x = Math.round(evt.target.nipples[0].frontPosition.x);
+          const y = Math.round(evt.target.nipples[0].frontPosition.y);
+          console.log(`${titleElement.value}:${x}:${y}#`);
 
           //フォーマットに従って値を変換
           const textEncoder = new TextEncoder();
-          const text_data_encoded = textEncoder.encode(`${titleElement.value}:${evt.target.nipples[0].frontPosition.x}:${evt.target.nipples[0].frontPosition.y}#`);
+          const text_data_encoded = textEncoder.encode(`${titleElement.value}:${x}:${y}#`);
 
           ble.write('UUID1', text_data_encoded);
+
+          endTime = performance.now();
+
+
         })
 
         idCounter++;
