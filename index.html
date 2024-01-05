@@ -12,10 +12,17 @@
     integrity="sha512-7PRZndBOTMkYqbGwO6dvNDozKEwaJYu3zPLoLv0rzOLMPQ2PVh6yaevCZOUL8+/n+A16fnLYEBKAlYXgMBn54w=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.gridster/0.5.6/jquery.gridster.min.css" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+    integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+    crossorigin="anonymous"></script>
   <script type="text/javascript" src="bluejelly.js"></script>
   <style>
     /* Container style with responsive grid */
@@ -39,26 +46,26 @@
     }
 
     .image-border {
-            position: absolute;
-            top: 2.5lh;
-            right: 0;
-            bottom: 0.25lh;
-            left: 0;
-            overflow: hidden;
+      position: absolute;
+      top: 2.5lh;
+      right: 0;
+      bottom: 0.25lh;
+      left: 0;
+      overflow: hidden;
     }
 
     .button-border {
-            position: absolute;
-            top: 2.5lh;
-            right: 0;
-            bottom: 0.25lh;
-            left: 0;
-            overflow: hidden;
+      position: absolute;
+      top: 2.5lh;
+      right: 0;
+      bottom: 0.25lh;
+      left: 0;
+      overflow: hidden;
     }
 
     .image-border img {
-            width: 100%;
-            height: 100%;
+      width: 100%;
+      height: 100%;
     }
 
     .nopadding {
@@ -72,7 +79,7 @@
 
   <div class="p-2">
     <button class="btn btn-dark " id="ble-scan-btn">Scan</button>
-  
+
     <button class="btn btn-dark" id="add-joystick-btn">+ joystick</button>
     <button class="btn btn-dark" id="add-button-btn">+ button</button>
     <button class="btn btn-dark" id="disable-dragging-btn">Run</button>
@@ -234,12 +241,16 @@
         document.getElementById(`item-ui-${idCounter}`).addEventListener('click', function (e) {
           const id = e.currentTarget.dataset['id'];
           const titleElement = document.getElementById(`item-title-${id}`);
-          console.log("click:",titleElement.value)
+          console.log("click:", titleElement.value)
 
-          ble.write('UUID1', `${titleElement.value}#`);
+          //フォーマットに従って値を変換
+          const textEncoder = new TextEncoder();
+          const text_data_encoded = textEncoder.encode(`${titleElement.value}#`);
+
+          ble.write('UUID1', text_data_encoded);
 
         });
-      
+
         idCounter++;
       }
 
