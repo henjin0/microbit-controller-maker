@@ -56,10 +56,11 @@
 
 <body>
 
-  <button id="add-tile-btn">Add Resizable Tile</button>
-  <button id="disable-dragging-btn">Disable Dragging</button>
-  <button id="enable-dragging-btn">Enable Dragging</button>
-
+  <div class="p-2">
+        <button class="btn btn-dark" id="add-tile-btn">+ joystick</button>
+        <button class="btn btn-dark" id="disable-dragging-btn">Run</button>
+        <button class="btn btn-dark " id="enable-dragging-btn">Stop</button>
+  </div>
 
   <div id="tile-container">
     <!-- Initial tiles go here -->
@@ -72,7 +73,7 @@
       // Initialize Gridster
       let gridster = $("#tile-container").gridster({
         widget_margins: [5, 5],
-        widget_base_dimensions: [150, 250],
+        widget_base_dimensions: [175, 250],
         autogenerate_stylesheet: true,
         avoid_overlapped_widgets: true,
         resize: {
