@@ -286,7 +286,7 @@
           txt = `${txt}${element}:${valsStr}:`;
         });
         txt = `${txt.slice(0, -1)}#`
-
+        console.log(txt)
         document.getElementById('op-text').innerHTML = txt;
         // フォーマットに従って値を変換
         const textEncoder = new TextEncoder();
