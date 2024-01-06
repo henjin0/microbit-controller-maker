@@ -310,9 +310,17 @@
         console.log(op_text)
         const jsondata = optextToJson(op_text.slice(0,-1));
         console.log(jsondata);
-        const txt = calculateJSONAverages(jsondata);
+        const calcJsonData = calculateJSONAverages(jsondata);
+
+        const fields = Object.keys(calcJsonData);
+        let txt = '';
+        fields.forEach(element => {
+          const valsStr = calcJsonData[element].join(':');
+          txt = `${txt}${element}:${valsStr}`;
+        });
+
         console.log(txt)
-        document.getElementById('op-text').innerHTML = JSON.stringify(txt);
+        document.getElementById('op-text').innerHTML = txt;
         op_text = '';
       };
       setInterval(sendBLE, 100);
