@@ -274,7 +274,7 @@
           const titleElement = document.getElementById(`item-title-${id}`);
           console.log("click:", titleElement.value)
 
-          op_text = op_text + `${titleElement.value}:`;
+          op_text = op_text + `${titleElement.value}:1:`;
 
           //フォーマットに従って値を変換
           // const textEncoder = new TextEncoder();
@@ -307,48 +307,81 @@
       const sendBLE = function () {
         if (op_text === '')
           return;
-
-        const txt = calculateAverageValues(op_text);
-        console.log('result:',txt);
-        document.getElementById('op-text').innerHTML = txt;
+        console.log(op_text)
+        const jsondata = optextToJson(op_text.slice(0,-1));
+        console.log(jsondata);
+        const txt = calculateJSONAverages(jsondata);
+        console.log(txt)
+        document.getElementById('op-text').innerHTML = JSON.stringify(txt);
         op_text = '';
       };
       setInterval(sendBLE, 100);
 
-      function calculateAverageValues(str) {
-    const keyValuePairs = str.split(':');
-    const resultMap = {};
+      function optextToJson(str) {
+        const keyValuePairs = str.split(':');
+        const data = {};
 
-    for (let i = 0; i < keyValuePairs.length; i += 2) {
-        const key = keyValuePairs[i];
-        const value = parseFloat(keyValuePairs[i + 1]);
+        let currentKey = null;
+        let currentValues = [];
 
-        if (isNaN(value)) {
-            continue;
+        for (const item of keyValuePairs) {
+          if (isNaN(parseFloat(item))) {
+            // itemが数値でない場合はキーとして処理
+            if (currentKey !== null) {
+              if (!data[currentKey]) {
+                data[currentKey] = [];
+              }
+              data[currentKey].push(currentValues.map(parseFloat));
+              currentValues = [];
+            }
+            currentKey = item;
+          } else {
+            // itemが数値の場合は値として処理
+            currentValues.push(parseFloat(item));
+          }
         }
 
-        if (resultMap[key]) {
-            resultMap[key].push(value);
-        } else {
-            resultMap[key] = [value];
+        // 最後のキーと値の組を処理
+        if (currentKey !== null) {
+          if (!data[currentKey]) {
+            data[currentKey] = [];
+          }
+          data[currentKey].push(currentValues.map(parseFloat));
         }
-    }
 
-    const resultArray = [];
-    for (const key in resultMap) {
-        const values = resultMap[key];
-        const average = values.reduce((sum, val) => sum + val, 0) / values.length;
-        resultArray.push(`${key}:${average.toFixed(2)}`);
-    }
+        // キーごとの平均値を計算
+        const result = {};
+        for (const key in data) {
+          const valuesArray = data[key];
+          result[key] = valuesArray.length > 1 ? valuesArray : valuesArray[0];
+        }
 
-    return resultArray.join(':');
-}
+        return result;
+      }
 
-const inputString = "ui-1:10:20:ui-1:30:40:hgs:0.3:hgs:0.5:hgs:9:hgs:7:hgs:9:popo:1:2:3:popo:4:5:6";
-const result = calculateAverageValues(inputString);
-console.log(result);
+      function calculateJSONAverages(data) {
+        const result = {};
 
+        for (const key in data) {
+          if (data.hasOwnProperty(key)) {
+            const values = data[key][0]; // Assuming each array in the input has the same length
 
+            // Calculate the sum for each element
+            const sumArray = values.length > 1 ? values.reduce((acc, _, index) => {
+              acc[index] = data[key].reduce((sum, arr) => sum + arr[index], 0);
+              return acc;
+            }, []) : data[key];
+
+            // Calculate the average for each element
+            const averageArray = sumArray.length > 1 ? sumArray.map(sum => sum / data[key].length) : sumArray;
+
+            // Store the result in the new structure
+            result[key] = averageArray;
+          }
+        }
+
+        return result;
+      }
 
     });
   </script>
