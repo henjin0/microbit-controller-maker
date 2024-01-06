@@ -273,7 +273,15 @@
         gridster.remove_widget(widget);
       };
 
+      let endTime = performance.now();
       const sendBLE = function () {
+
+        const startTime = performance.now();
+        if (startTime - endTime < 100) {
+            console.log(startTime - endTime)
+            return;
+        }
+
         if (op_text === '')
           return;
         const jsondata = optextToJson(op_text.slice(0, -1));
@@ -294,6 +302,7 @@
         ble.write('UUID1', text_data_encoded);
 
         op_text = '';
+        endTime = performance.now();
       };
       setInterval(sendBLE, 10);
 
