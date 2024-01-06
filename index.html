@@ -76,6 +76,10 @@
     body {
       overscroll-behavior-y: none;
     }
+
+    img {
+      pointer-events: none;
+    }
   </style>
 </head>
 
@@ -200,8 +204,8 @@
           color: "blue",
         }).on("move", function (evt, data) {
           const startTime = performance.now();
-         
-          if(startTime - endTime < 100){
+
+          if (startTime - endTime < 100) {
             console.log(startTime - endTime)
             return;
           }
