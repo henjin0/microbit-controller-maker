@@ -308,9 +308,14 @@
           const valsStr = calcJsonData[element].join(':');
           txt = `${txt}${element}:${valsStr}:`;
         });
-        txt = `${txt.slice(0,-1)}#`
+        txt = `${txt.slice(0, -1)}#`
 
         document.getElementById('op-text').innerHTML = txt;
+        // フォーマットに従って値を変換
+        const textEncoder = new TextEncoder();
+        const text_data_encoded = textEncoder.encode(txt);
+        ble.write('UUID1', text_data_encoded);
+
         op_text = '';
       };
       setInterval(sendBLE, 100);
