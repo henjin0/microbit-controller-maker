@@ -194,8 +194,6 @@
       `;
         let newTile = gridster.add_widget(tileContent, 1, 1);
 
-        // endTime[`item-ui-${idCounter}`] = performance.now();
-
         // Assign a random background color
         let randomColor = getRandomColor();
         newTile[0].style.backgroundColor = randomColor;
@@ -204,25 +202,11 @@
           zone: document.getElementById(`item-ui-${idCounter}`),
           color: "blue",
         }).on("move", function (evt, data) {
-          // const startTime = performance.now();
-
-          // if (startTime - endTime[`item-ui-${idCounter}`] < 100) {
-          //   return;
-          // }
 
           const titleElement = document.getElementById(`item-title-${evt.target.id}`);
           const x = evt.target.nipples[0].frontPosition.x;
           const y = evt.target.nipples[0].frontPosition.y;
           op_text = op_text + `${titleElement.value}:${x}:${y}:`;
-
-          //フォーマットに従って値を変換
-          // const textEncoder = new TextEncoder();
-          // const text_data_encoded = textEncoder.encode(`${titleElement.value}:${x}:${y}#`);
-
-          //ble.write('UUID1', text_data_encoded);
-
-          // endTime[`item-ui-${idCounter}`] = performance.now();
-
 
         })
 
@@ -270,13 +254,6 @@
           const id = e.currentTarget.dataset['id'];
           const titleElement = document.getElementById(`item-title-${id}`);
           op_text = op_text + `${titleElement.value}:1:`;
-
-          //フォーマットに従って値を変換
-          // const textEncoder = new TextEncoder();
-          // const text_data_encoded = textEncoder.encode(`${titleElement.value}#`);
-
-          //ble.write('UUID1', text_data_encoded);
-
         });
 
         idCounter++;
@@ -318,7 +295,7 @@
 
         op_text = '';
       };
-      setInterval(sendBLE, 100);
+      setInterval(sendBLE, 300);
 
       function optextToJson(str) {
         const keyValuePairs = str.split(':');
