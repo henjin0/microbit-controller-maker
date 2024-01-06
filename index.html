@@ -160,7 +160,7 @@
         return color;
       }
 
-      let endTime = {};
+      // let endTime = {};
       // Add a new resizable tile
       function addJoystick() {
         let tileContent = `
@@ -194,7 +194,7 @@
       `;
         let newTile = gridster.add_widget(tileContent, 1, 1);
 
-        endTime[`item-ui-${idCounter}`] = performance.now();
+        // endTime[`item-ui-${idCounter}`] = performance.now();
 
         // Assign a random background color
         let randomColor = getRandomColor();
@@ -204,27 +204,27 @@
           zone: document.getElementById(`item-ui-${idCounter}`),
           color: "blue",
         }).on("move", function (evt, data) {
-          const startTime = performance.now();
+          // const startTime = performance.now();
 
-          if (startTime - endTime[`item-ui-${idCounter}`] < 100) {
-            console.log(startTime - endTime)
-            return;
-          }
+          // if (startTime - endTime[`item-ui-${idCounter}`] < 100) {
+          //   console.log(startTime - endTime)
+          //   return;
+          // }
 
           const titleElement = document.getElementById(`item-title-${evt.target.id}`);
           const x = Math.round(evt.target.nipples[0].frontPosition.x);
           const y = Math.round(evt.target.nipples[0].frontPosition.y);
           console.log(`${titleElement.value}:${x}:${y}#`);
 
-          op_text = op_text + `${titleElement.value}:${x}:${y}`;
+          op_text = op_text + `${titleElement.value}:${x}:${y}:`;
 
           //フォーマットに従って値を変換
-          const textEncoder = new TextEncoder();
-          const text_data_encoded = textEncoder.encode(`${titleElement.value}:${x}:${y}#`);
+          // const textEncoder = new TextEncoder();
+          // const text_data_encoded = textEncoder.encode(`${titleElement.value}:${x}:${y}#`);
 
-          ble.write('UUID1', text_data_encoded);
+          //ble.write('UUID1', text_data_encoded);
 
-          endTime[`item-ui-${idCounter}`] = performance.now();
+          // endTime[`item-ui-${idCounter}`] = performance.now();
 
 
         })
@@ -274,13 +274,13 @@
           const titleElement = document.getElementById(`item-title-${id}`);
           console.log("click:", titleElement.value)
 
-          op_text = op_text + `${titleElement.value}`;
+          op_text = op_text + `${titleElement.value}:`;
 
           //フォーマットに従って値を変換
-          const textEncoder = new TextEncoder();
-          const text_data_encoded = textEncoder.encode(`${titleElement.value}#`);
+          // const textEncoder = new TextEncoder();
+          // const text_data_encoded = textEncoder.encode(`${titleElement.value}#`);
 
-          ble.write('UUID1', text_data_encoded);
+          //ble.write('UUID1', text_data_encoded);
 
         });
 
@@ -304,11 +304,51 @@
         gridster.remove_widget(widget);
       };
 
-      const log = function(){
-        document.getElementById('op-text').innerHTML = op_text;
+      const sendBLE = function () {
+        if (op_text === '')
+          return;
+
+        const txt = calculateAverageValues(op_text);
+        console.log('result:',txt);
+        document.getElementById('op-text').innerHTML = txt;
         op_text = '';
       };
-      setInterval(log, 100);
+      setInterval(sendBLE, 100);
+
+      function calculateAverageValues(str) {
+    const keyValuePairs = str.split(':');
+    const resultMap = {};
+
+    for (let i = 0; i < keyValuePairs.length; i += 2) {
+        const key = keyValuePairs[i];
+        const value = parseFloat(keyValuePairs[i + 1]);
+
+        if (isNaN(value)) {
+            continue;
+        }
+
+        if (resultMap[key]) {
+            resultMap[key].push(value);
+        } else {
+            resultMap[key] = [value];
+        }
+    }
+
+    const resultArray = [];
+    for (const key in resultMap) {
+        const values = resultMap[key];
+        const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+        resultArray.push(`${key}:${average.toFixed(2)}`);
+    }
+
+    return resultArray.join(':');
+}
+
+const inputString = "ui-1:10:20:ui-1:30:40:hgs:0.3:hgs:0.5:hgs:9:hgs:7:hgs:9:popo:1:2:3:popo:4:5:6";
+const result = calculateAverageValues(inputString);
+console.log(result);
+
+
 
     });
   </script>
