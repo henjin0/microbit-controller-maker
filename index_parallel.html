@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Draggable and Resizable Tiles with Gridster.js</title>
+  <!-- Gridster.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.gridster/0.5.6/jquery.gridster.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.9.0/nipplejs.min.js"
+    integrity="sha512-7PRZndBOTMkYqbGwO6dvNDozKEwaJYu3zPLoLv0rzOLMPQ2PVh6yaevCZOUL8+/n+A16fnLYEBKAlYXgMBn54w=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.gridster/0.5.6/jquery.gridster.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+    integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+    crossorigin="anonymous"></script>
+  <script type="text/javascript" src="bluejelly.js"></script>
+  <style>
+    /* Container style with responsive grid */
+    #tile-container {
+      margin: 10px;
+    }
+
+    /* Style for the resizable tiles */
+    .gs-w {
+      position: relative;
+      background-color: #3498db;
+      color: white;
+      text-align: center;
+      cursor: move;
+    }
+
+    .gs-resize-handle {
+      background-color: #fff;
+      cursor: nwse-resize;
+      /* Resize cursor */
+    }
+
+    .image-border {
+      position: absolute;
+      top: 2.5lh;
+      right: 0;
+      bottom: 0.25lh;
+      left: 0;
+      overflow: hidden;
+    }
+
+    .button-border {
+      position: absolute;
+      top: 2.5lh;
+      right: 0;
+      bottom: 0.25lh;
+      left: 0;
+      overflow: hidden;
+    }
+
+    .image-border img {
+      width: 100%;
+      height: 100%;
+    }
+
+    .nopadding {
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    body {
+      overscroll-behavior-y: none;
+    }
+
+    img {
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="p-2">
+    <button class="btn btn-dark " id="ble-scan-btn">Scan</button>
+
+    <button class="btn btn-dark" id="add-joystick-btn">+ joystick</button>
+    <button class="btn btn-dark" id="add-button-btn">+ button</button>
+    <button class="btn btn-dark" id="disable-dragging-btn">Run</button>
+    <button class="btn btn-dark " id="enable-dragging-btn">Stop</button>
+    <span id="op-text">here is op</span>
+  </div>
+
+  <div id="tile-container">
+    <!-- Initial tiles go here -->
+  </div>
+
+  <script>
+    let idCounter = 0;
+    let op_text = '';
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+      const ble = new BlueJelly();
+      window.onload = function () {
+        //UUIDの設定
+        ble.setUUID("UUID1", BlueJelly.MICROBIT_UART_SERVICE, BlueJelly.MICROBIT_RX_CHARACTERISTIC);
+      }
+
+
+      // Initialize Gridster
+      let gridster = $("#tile-container").gridster({
+        widget_margins: [3, 3],
+        widget_base_dimensions: [80, 150],
+        autogenerate_stylesheet: true,
+        avoid_overlapped_widgets: true,
+        resize: {
+          enabled: true,
+        },
+      }).data('gridster');
+
+
+      // Event listener for adding a new tile
+      document.getElementById('ble-scan-btn').addEventListener('click', function () {
+        ble.scan("UUID1");
+      });
+
+      // Event listener for adding a new tile
+      document.getElementById('add-joystick-btn').addEventListener('click', function () {
+        addJoystick();
+      });
+
+      // Event listener for adding a new tile
+      document.getElementById('add-button-btn').addEventListener('click', function () {
+        addButton();
+      });
+
+      // Event listener for adding a new tile
+      document.getElementById('disable-dragging-btn').addEventListener('click', function () {
+        disableDraggingTile();
+      });
+
+      // Event listener for adding a new tile
+      document.getElementById('enable-dragging-btn').addEventListener('click', function () {
+        enableDraggingTile();
+      });
+
+
+      // Function to generate a random color
+      function getRandomColor() {
+        let letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      }
+
+      // let endTime = {};
+      // Add a new resizable tile
+      function addJoystick() {
+        let tileContent = `
+        <div class="gs-w" id="item-${idCounter}">
+          <div>
+            ≡≡≡≡
+          </div>
+          <div class="container-fluid">
+            <div class="row">
+                <div class="col-8 nopadding">
+                  <input class="w-100 text-center form-control-sm form-control input-block" type="text" id="item-title-${idCounter}" required value="ui-${idCounter}" />
+                </div>
+                <div class="col-4 nopadding">
+                  <button class="text-center w-100 btn btn-danger btn-block btn-sm" onclick="deleteTile(this)">x</button>
+                </div>
+            </div>
+          </div>
+
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col">
+
+              <div class="image-border" id="item-ui-${idCounter}">
+                <img class="img-fluid" src="joystick.png"/>
+              </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+        let newTile = gridster.add_widget(tileContent, 1, 1);
+
+        // endTime[`item-ui-${idCounter}`] = performance.now();
+
+        // Assign a random background color
+        let randomColor = getRandomColor();
+        newTile[0].style.backgroundColor = randomColor;
+
+        nipplejs.create({
+          zone: document.getElementById(`item-ui-${idCounter}`),
+          color: "blue",
+        }).on("move", function (evt, data) {
+          // const startTime = performance.now();
+
+          // if (startTime - endTime[`item-ui-${idCounter}`] < 100) {
+          //   return;
+          // }
+
+          const titleElement = document.getElementById(`item-title-${evt.target.id}`);
+          const x = evt.target.nipples[0].frontPosition.x;
+          const y = evt.target.nipples[0].frontPosition.y;
+          op_text = op_text + `${titleElement.value}:${x}:${y}:`;
+
+          //フォーマットに従って値を変換
+          // const textEncoder = new TextEncoder();
+          // const text_data_encoded = textEncoder.encode(`${titleElement.value}:${x}:${y}#`);
+
+          //ble.write('UUID1', text_data_encoded);
+
+          // endTime[`item-ui-${idCounter}`] = performance.now();
+
+
+        })
+
+        idCounter++;
+      }
+
+      // Add a new resizable tile
+      function addButton() {
+        let tileContent = `
+        <div class="gs-w" id="item-${idCounter}">
+          <div>
+            ≡≡≡≡
+          </div>
+          <div class="container-fluid">
+            <div class="row">
+                <div class="col-8 nopadding">
+                  <input class="w-100 text-center form-control-sm form-control input-block" type="text" id="item-title-${idCounter}" required value="ui-${idCounter}" />
+                </div>
+                <div class="col-4 nopadding">
+                  <button class="text-center w-100 btn btn-danger btn-block btn-sm" onclick="deleteTile(this)">x</button>
+                </div>
+            </div>
+          </div>
+
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col nopadding button-border">
+                <button data-id="${idCounter}" id="item-ui-${idCounter}" class="text-center btn btn-success rounded-circle btn-block w-100 h-100">＋</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        
+      `;
+
+        let newTile = gridster.add_widget(tileContent, 1, 1);
+
+        // Assign a random background color
+        let randomColor = getRandomColor();
+        newTile[0].style.backgroundColor = randomColor;
+
+        // Event listener for adding a new tile
+        document.getElementById(`item-ui-${idCounter}`).addEventListener('click', function (e) {
+          const id = e.currentTarget.dataset['id'];
+          const titleElement = document.getElementById(`item-title-${id}`);
+          op_text = op_text + `${titleElement.value}:1:`;
+
+          //フォーマットに従って値を変換
+          // const textEncoder = new TextEncoder();
+          // const text_data_encoded = textEncoder.encode(`${titleElement.value}#`);
+
+          //ble.write('UUID1', text_data_encoded);
+
+        });
+
+        idCounter++;
+      }
+
+      function disableDraggingTile() {
+        gridster.disable();
+      }
+
+      function enableDraggingTile() {
+        gridster.enable();
+      }
+
+      // Delete the tile when the delete button is clicked
+      window.deleteTile = function (button) {
+        let widget = $(button).closest('.gs-w')[0];
+        gridster.remove_widget(widget);
+      };
+
+      const sendBLE = function () {
+        if (op_text === '')
+          return;
+        const jsondata = optextToJson(op_text.slice(0, -1));
+        const calcJsonData = calculateJSONAverages(jsondata);
+
+        const fields = Object.keys(calcJsonData);
+        let txt = '';
+        fields.forEach(element => {
+          const valsStr = calcJsonData[element].join(':');
+          txt = `${txt}${element}:${valsStr}:`;
+        });
+        txt = `${txt.slice(0, -1)}#`
+
+        document.getElementById('op-text').innerHTML = txt;
+        // フォーマットに従って値を変換
+        const textEncoder = new TextEncoder();
+        const text_data_encoded = textEncoder.encode(txt);
+        ble.write('UUID1', text_data_encoded);
+
+        op_text = '';
+      };
+      setInterval(sendBLE, 100);
+
+      function optextToJson(str) {
+        const keyValuePairs = str.split(':');
+        const data = {};
+
+        let currentKey = null;
+        let currentValues = [];
+
+        for (const item of keyValuePairs) {
+          if (isNaN(parseFloat(item))) {
+            // itemが数値でない場合はキーとして処理
+            if (currentKey !== null) {
+              if (!data[currentKey]) {
+                data[currentKey] = [];
+              }
+              data[currentKey].push(currentValues.map(parseFloat));
+              currentValues = [];
+            }
+            currentKey = item;
+          } else {
+            // itemが数値の場合は値として処理
+            currentValues.push(parseFloat(item));
+          }
+        }
+
+        // 最後のキーと値の組を処理
+        if (currentKey !== null) {
+          if (!data[currentKey]) {
+            data[currentKey] = [];
+          }
+          data[currentKey].push(currentValues.map(parseFloat));
+        }
+
+        // キーごとの平均値を計算
+        const result = {};
+        for (const key in data) {
+          const valuesArray = data[key];
+          result[key] = valuesArray.length > 1 ? valuesArray : valuesArray[0];
+        }
+
+        return result;
+      }
+
+      function calculateJSONAverages(data) {
+        const result = {};
+
+        for (const key in data) {
+          if (data.hasOwnProperty(key)) {
+            const values = data[key][0]; // Assuming each array in the input has the same length
+
+            // Calculate the sum for each element
+            const sumArray = values.length > 1 ? values.reduce((acc, _, index) => {
+              acc[index] = data[key].reduce((sum, arr) => sum + arr[index], 0);
+              return acc;
+            }, []) : data[key];
+
+            // Calculate the average for each element
+            const averageArray = sumArray.length > 1 ? sumArray.map(
+              sum => {
+                return Math.round(sum / data[key].length)
+              }) : sumArray;
+
+            // Store the result in the new structure
+            result[key] = averageArray;
+          }
+        }
+
+        return result;
+      }
+
+    });
+  </script>
+
+</body>
+
+</html>
