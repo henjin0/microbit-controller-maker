@@ -207,15 +207,12 @@
           // const startTime = performance.now();
 
           // if (startTime - endTime[`item-ui-${idCounter}`] < 100) {
-          //   console.log(startTime - endTime)
           //   return;
           // }
 
           const titleElement = document.getElementById(`item-title-${evt.target.id}`);
-          const x = Math.round(evt.target.nipples[0].frontPosition.x);
-          const y = Math.round(evt.target.nipples[0].frontPosition.y);
-          console.log(`${titleElement.value}:${x}:${y}#`);
-
+          const x = evt.target.nipples[0].frontPosition.x;
+          const y = evt.target.nipples[0].frontPosition.y;
           op_text = op_text + `${titleElement.value}:${x}:${y}:`;
 
           //フォーマットに従って値を変換
@@ -272,8 +269,6 @@
         document.getElementById(`item-ui-${idCounter}`).addEventListener('click', function (e) {
           const id = e.currentTarget.dataset['id'];
           const titleElement = document.getElementById(`item-title-${id}`);
-          console.log("click:", titleElement.value)
-
           op_text = op_text + `${titleElement.value}:1:`;
 
           //フォーマットに従って値を変換
@@ -287,7 +282,6 @@
         idCounter++;
       }
 
-
       function disableDraggingTile() {
         gridster.disable();
       }
@@ -298,28 +292,24 @@
 
       // Delete the tile when the delete button is clicked
       window.deleteTile = function (button) {
-        console.log(button)
         let widget = $(button).closest('.gs-w')[0];
-        console.log(widget)
         gridster.remove_widget(widget);
       };
 
       const sendBLE = function () {
         if (op_text === '')
           return;
-        console.log(op_text)
-        const jsondata = optextToJson(op_text.slice(0,-1));
-        console.log(jsondata);
+        const jsondata = optextToJson(op_text.slice(0, -1));
         const calcJsonData = calculateJSONAverages(jsondata);
 
         const fields = Object.keys(calcJsonData);
         let txt = '';
         fields.forEach(element => {
           const valsStr = calcJsonData[element].join(':');
-          txt = `${txt}${element}:${valsStr}`;
+          txt = `${txt}${element}:${valsStr}:`;
         });
+        txt = `${txt.slice(0,-1)}#`
 
-        console.log(txt)
         document.getElementById('op-text').innerHTML = txt;
         op_text = '';
       };
@@ -381,7 +371,10 @@
             }, []) : data[key];
 
             // Calculate the average for each element
-            const averageArray = sumArray.length > 1 ? sumArray.map(sum => sum / data[key].length) : sumArray;
+            const averageArray = sumArray.length > 1 ? sumArray.map(
+              sum => {
+                return Math.round(sum / data[key].length)
+              }) : sumArray;
 
             // Store the result in the new structure
             result[key] = averageArray;
@@ -393,7 +386,6 @@
 
     });
   </script>
-
 
 </body>
 
