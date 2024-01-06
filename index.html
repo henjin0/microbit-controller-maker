@@ -92,7 +92,6 @@
     <button class="btn btn-dark" id="add-button-btn">+ button</button>
     <button class="btn btn-dark" id="disable-dragging-btn">Run</button>
     <button class="btn btn-dark " id="enable-dragging-btn">Stop</button>
-    <span id="op-text">here is op</span>
   </div>
 
   <div id="tile-container">
@@ -101,7 +100,6 @@
 
   <script>
     let idCounter = 0;
-    let op_text = '';
 
     document.addEventListener('DOMContentLoaded', function () {
 
@@ -216,8 +214,6 @@
           const y = Math.round(evt.target.nipples[0].frontPosition.y);
           console.log(`${titleElement.value}:${x}:${y}#`);
 
-          op_text = op_text + `${titleElement.value}:${x}:${y}`;
-
           //フォーマットに従って値を変換
           const textEncoder = new TextEncoder();
           const text_data_encoded = textEncoder.encode(`${titleElement.value}:${x}:${y}#`);
@@ -274,8 +270,6 @@
           const titleElement = document.getElementById(`item-title-${id}`);
           console.log("click:", titleElement.value)
 
-          op_text = op_text + `${titleElement.value}`;
-
           //フォーマットに従って値を変換
           const textEncoder = new TextEncoder();
           const text_data_encoded = textEncoder.encode(`${titleElement.value}#`);
@@ -303,12 +297,6 @@
         console.log(widget)
         gridster.remove_widget(widget);
       };
-
-      const log = function(){
-        document.getElementById('op-text').innerHTML = op_text;
-        op_text = '';
-      };
-      setInterval(log, 100);
 
     });
   </script>
