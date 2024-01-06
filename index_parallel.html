@@ -92,6 +92,7 @@
     <button class="btn btn-dark" id="add-button-btn">+ button</button>
     <button class="btn btn-dark" id="disable-dragging-btn">Run</button>
     <button class="btn btn-dark " id="enable-dragging-btn">Stop</button>
+    <span id="op-text">here is op</span>
   </div>
 
   <div id="tile-container">
@@ -100,6 +101,7 @@
 
   <script>
     let idCounter = 0;
+    let op_text = '';
 
     document.addEventListener('DOMContentLoaded', function () {
 
@@ -158,7 +160,7 @@
         return color;
       }
 
-      let endTime = {};
+      // let endTime = {};
       // Add a new resizable tile
       function addJoystick() {
         let tileContent = `
@@ -192,7 +194,7 @@
       `;
         let newTile = gridster.add_widget(tileContent, 1, 1);
 
-        endTime[`item-ui-${idCounter}`] = performance.now();
+        // endTime[`item-ui-${idCounter}`] = performance.now();
 
         // Assign a random background color
         let randomColor = getRandomColor();
@@ -202,25 +204,24 @@
           zone: document.getElementById(`item-ui-${idCounter}`),
           color: "blue",
         }).on("move", function (evt, data) {
-          const startTime = performance.now();
+          // const startTime = performance.now();
 
-          if (startTime - endTime[`item-ui-${idCounter}`] < 100) {
-            console.log(startTime - endTime)
-            return;
-          }
+          // if (startTime - endTime[`item-ui-${idCounter}`] < 100) {
+          //   return;
+          // }
 
           const titleElement = document.getElementById(`item-title-${evt.target.id}`);
-          const x = Math.round(evt.target.nipples[0].frontPosition.x);
-          const y = Math.round(evt.target.nipples[0].frontPosition.y);
-          console.log(`${titleElement.value}:${x}:${y}#`);
+          const x = evt.target.nipples[0].frontPosition.x;
+          const y = evt.target.nipples[0].frontPosition.y;
+          op_text = op_text + `${titleElement.value}:${x}:${y}:`;
 
           //フォーマットに従って値を変換
-          const textEncoder = new TextEncoder();
-          const text_data_encoded = textEncoder.encode(`${titleElement.value}:${x}:${y}#`);
+          // const textEncoder = new TextEncoder();
+          // const text_data_encoded = textEncoder.encode(`${titleElement.value}:${x}:${y}#`);
 
-          ble.write('UUID1', text_data_encoded);
+          //ble.write('UUID1', text_data_encoded);
 
-          endTime[`item-ui-${idCounter}`] = performance.now();
+          // endTime[`item-ui-${idCounter}`] = performance.now();
 
 
         })
@@ -268,19 +269,18 @@
         document.getElementById(`item-ui-${idCounter}`).addEventListener('click', function (e) {
           const id = e.currentTarget.dataset['id'];
           const titleElement = document.getElementById(`item-title-${id}`);
-          console.log("click:", titleElement.value)
+          op_text = op_text + `${titleElement.value}:1:`;
 
           //フォーマットに従って値を変換
-          const textEncoder = new TextEncoder();
-          const text_data_encoded = textEncoder.encode(`${titleElement.value}#`);
+          // const textEncoder = new TextEncoder();
+          // const text_data_encoded = textEncoder.encode(`${titleElement.value}#`);
 
-          ble.write('UUID1', text_data_encoded);
+          //ble.write('UUID1', text_data_encoded);
 
         });
 
         idCounter++;
       }
-
 
       function disableDraggingTile() {
         gridster.disable();
@@ -292,15 +292,105 @@
 
       // Delete the tile when the delete button is clicked
       window.deleteTile = function (button) {
-        console.log(button)
         let widget = $(button).closest('.gs-w')[0];
-        console.log(widget)
         gridster.remove_widget(widget);
       };
 
+      const sendBLE = function () {
+        if (op_text === '')
+          return;
+        const jsondata = optextToJson(op_text.slice(0, -1));
+        const calcJsonData = calculateJSONAverages(jsondata);
+
+        const fields = Object.keys(calcJsonData);
+        let txt = '';
+        fields.forEach(element => {
+          const valsStr = calcJsonData[element].join(':');
+          txt = `${txt}${element}:${valsStr}:`;
+        });
+        txt = `${txt.slice(0, -1)}#`
+
+        document.getElementById('op-text').innerHTML = txt;
+        // フォーマットに従って値を変換
+        const textEncoder = new TextEncoder();
+        const text_data_encoded = textEncoder.encode(txt);
+        ble.write('UUID1', text_data_encoded);
+
+        op_text = '';
+      };
+      setInterval(sendBLE, 100);
+
+      function optextToJson(str) {
+        const keyValuePairs = str.split(':');
+        const data = {};
+
+        let currentKey = null;
+        let currentValues = [];
+
+        for (const item of keyValuePairs) {
+          if (isNaN(parseFloat(item))) {
+            // itemが数値でない場合はキーとして処理
+            if (currentKey !== null) {
+              if (!data[currentKey]) {
+                data[currentKey] = [];
+              }
+              data[currentKey].push(currentValues.map(parseFloat));
+              currentValues = [];
+            }
+            currentKey = item;
+          } else {
+            // itemが数値の場合は値として処理
+            currentValues.push(parseFloat(item));
+          }
+        }
+
+        // 最後のキーと値の組を処理
+        if (currentKey !== null) {
+          if (!data[currentKey]) {
+            data[currentKey] = [];
+          }
+          data[currentKey].push(currentValues.map(parseFloat));
+        }
+
+        // キーごとの平均値を計算
+        const result = {};
+        for (const key in data) {
+          const valuesArray = data[key];
+          result[key] = valuesArray.length > 1 ? valuesArray : valuesArray[0];
+        }
+
+        return result;
+      }
+
+      function calculateJSONAverages(data) {
+        const result = {};
+
+        for (const key in data) {
+          if (data.hasOwnProperty(key)) {
+            const values = data[key][0]; // Assuming each array in the input has the same length
+
+            // Calculate the sum for each element
+            const sumArray = values.length > 1 ? values.reduce((acc, _, index) => {
+              acc[index] = data[key].reduce((sum, arr) => sum + arr[index], 0);
+              return acc;
+            }, []) : data[key];
+
+            // Calculate the average for each element
+            const averageArray = sumArray.length > 1 ? sumArray.map(
+              sum => {
+                return Math.round(sum / data[key].length)
+              }) : sumArray;
+
+            // Store the result in the new structure
+            result[key] = averageArray;
+          }
+        }
+
+        return result;
+      }
+
     });
   </script>
-
 
 </body>
 
